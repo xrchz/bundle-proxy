@@ -1,0 +1,14 @@
+{
+  "name": "bundle-proxy",
+  "version": "0.0.1",
+  "license": "GPL-3.0-or-later",
+  "description": "Ethereum RPC Proxy to help create and submit Flashbots bundles",
+  "dependencies": {
+    "dotenv": ">=16.0.1",
+    "commander": ">=9.4.0",
+    "express": ">=4.17.1",
+    "tiny-json-http": ">=7.4.2",
+    "ethers": ">=5.6.9",
+    "@flashbots/ethers-provider-bundle": ">=0.5.0"
+  }
+}
