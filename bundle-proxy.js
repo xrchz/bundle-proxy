@@ -15,10 +15,10 @@ app.use(express.json())
 app.post('/', async (req, res) => {
   const { jsonrpc, id, method, params } = req.body
   if (method == 'eth_sendTransaction') {
-    console.log(`Got sendTransaction! params: ${JSON.stringify(params)}`)
+    console.log(`Captured sendTransaction:\n${JSON.stringify(params)}`)
   }
   else if (method == 'eth_sendRawTransaction') {
-    console.log(`Got sendRawTransaction! params: ${JSON.stringify(params)}`)
+    console.log(`Captured sendRawTransaction:\n${params[0]}`)
   }
   else {
     // console.log(`Proxying data: ${JSON.stringify(req.body)}`)
