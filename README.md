@@ -23,13 +23,14 @@ machine where you can use a browser with Metamask (to use the staking website).
 
 ## Capture a stake/mint transaction
 1. Add a Metamask RPC representing the bundle proxy RPC.
-   E.g., ssh with port forwarding into your node machine with `ssh -L 8549:localhost:8549 <your node>`,
+   E.g., ssh with port forwarding into your node machine with `ssh -NL 8549:localhost:8549 <your node>`,
    then add Metamask network with address `http://localhost:8549`.
 2. Switch networks to the newly added network.
 3. Go to <https://stake.rocketpool.net>, connect your Metamask wallet, and attempt to make the deposit transaction.
 4. Save (append a new line) the recorded hash (after `Capture eth_sendRawTransaction`) output by the proxy in `txs.txt`.
 5. Clear the queued transaction from Metamask: Settings -> Advanced -> Reset Account.
-6. Ensure the transaction is gone, and switch Metamask networks back to normal. Now you can kill the bundle proxy RPC.
+6. Ensure the transaction is gone, and switch Metamask networks back to normal.
+   Now you can kill the bundle proxy RPC (and the ssh port forwarder).
 
 ## Send the bundle to Flashbots
 1. Run `node bundle-submit.js` to attempt to submit the bundle of 2 transactions saved in `txs.txt`; add `--help` to see more options.
