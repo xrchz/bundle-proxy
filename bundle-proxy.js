@@ -3,7 +3,7 @@ const tiny = require('tiny-json-http')
 
 program.option('-p, --port <port>', 'port to listen on', '8549')
        .option('-r, --rpc <url>', 'URL of base RPC server', 'http://localhost:8545')
-       .option('--overrideNonce <nonce>', 'override transaction count requets to this nonce')
+       .option('--overrideNonce <nonce>', 'rewrite responses to transaction count requests with this nonce')
 program.parse()
 const options = program.opts()
 const url = options.rpc
