@@ -13,7 +13,8 @@ const maxTries = parseInt(options.maxTries)
 
 const bundle = require('fs')
   .readFileSync(options.txFile, 'utf-8')
-  .split('\n').slice(0,-1)
+  .split('\n')
+  .filter(line => line.length && !line.startsWith('#'))
   .map(tx => ({signedTransaction: tx}))
 const ethers = require('ethers')
 
