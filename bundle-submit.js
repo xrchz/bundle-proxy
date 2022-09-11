@@ -1,14 +1,12 @@
 require('dotenv').config()
 const { program } = require('commander')
-program.option('-f, --futureBlocks <n>', 'number of blocks after current to start', '1')
-       .option('-m, --maxTries <m>', 'number of blocks to attempt to submit the bundle', '10')
+program.option('-m, --maxTries <m>', 'number of blocks to attempt to submit the bundle for', '10')
        .option('-c, --network <name>', 'network (chain)', 'mainnet')
        .option('-t, --txFile <file>', 'file containing lines of signed transactions', 'txs.txt')
        .option('-n, --dryRun', 'simulate bundle only')
 program.parse()
 const options = program.opts()
 
-const futureBlocks = parseInt(options.futureBlocks)
 const maxTries = parseInt(options.maxTries)
 
 const bundle = require('fs')
@@ -62,7 +60,7 @@ const currentBlockNumber = await provider.getBlockNumber()
 const currentBlock = await provider.getBlock(currentBlockNumber)
 const currentBaseFeePerGas = currentBlock.baseFeePerGas
 const maxBaseFeeInFutureBlock = flashbots.FlashbotsBundleProvider.getMaxBaseFeeInFutureBlock(
-  currentBaseFeePerGas, futureBlocks + maxTries - 1)
+  currentBaseFeePerGas, maxTries)
 
 
 console.log(`Current block number: ${currentBlockNumber}`)
@@ -74,7 +72,7 @@ if (minMaxFeeInBundle.lt(maxBaseFeeInFutureBlock)) {
 }
 
 if (options.dryRun) {
-  const targetBlockNumber = currentBlockNumber + futureBlocks
+  const targetBlockNumber = currentBlockNumber + 1
   console.log(`Target block number: ${targetBlockNumber}`)
   const signedBundle = await flashbotsProvider.signBundle(bundle)
   const simulation = await flashbotsProvider.simulate(signedBundle, targetBlockNumber)
@@ -85,7 +83,7 @@ if (options.dryRun) {
 else {
   const targetBlockNumbers = []
   const promises = []
-  for (let targetBlockNumber = currentBlockNumber + futureBlocks; targetBlockNumber < currentBlockNumber + futureBlocks + maxTries; targetBlockNumber++) {
+  for (let targetBlockNumber = currentBlockNumber + 1; targetBlockNumber <= currentBlockNumber + maxTries; targetBlockNumber++) {
     targetBlockNumbers.push(targetBlockNumber)
     promises.push(flashbotsProvider.sendBundle(bundle, targetBlockNumber))
   }
