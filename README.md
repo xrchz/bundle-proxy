@@ -33,7 +33,8 @@ machine where you can use a browser with Metamask (to use the staking website).
    Now you can kill the bundle proxy RPC (and the ssh port forwarder).
 
 ## Send the bundle to Flashbots
-1. Run `node bundle-submit.js` to attempt to submit the bundle of 2 transactions saved in `txs.txt`; add `--help` to see more options.
+1. Run `node bundle-submit.js --rpc <your execution client RPC address>` to attempt to submit
+   the bundle of 2 transactions saved in `txs.txt`; add `--help` to see more options.
 2. Wait for the bundle to be accepted (`BundleIncluded`).
    Congratulations you have now made a deposit and minted the rETH it unlocked at the protocol rate!
 

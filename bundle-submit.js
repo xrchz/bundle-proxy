@@ -1,8 +1,8 @@
-require('dotenv').config()
 const { program } = require('commander')
 program.option('-m, --maxTries <m>', 'number of blocks to attempt to submit the bundle for', '10')
-       .option('-c, --network <name>', 'network (chain)', 'mainnet')
+       .option('-r, --rpc <url>', 'RPC provider', 'http://localhost:8545')
        .option('-t, --txFile <file>', 'file containing lines of signed transactions', 'txs.txt')
+       .option('-a, --authSignerKey <privateKey>', 'optional key for flashbots reputation')
        .option('-n, --dryRun', 'simulate bundle only')
 program.parse()
 const options = program.opts()
@@ -42,19 +42,19 @@ const minMaxFeeInBundle = bundle
 
 const flashbots = require('@flashbots/ethers-provider-bundle')
 
-const provider = ethers.getDefaultProvider(options.network, {
-  'etherscan': process.env.ETHERSCAN_KEY,
-  'pocket': process.env.POCKET_KEY,
-});
+const provider = ethers.getDefaultProvider(options.rpc);
 
-const authSigner = new ethers.Wallet(process.env.AUTH_SIGNER_KEY)
+const authSigner = options.authSignerKey ?
+  new ethers.Wallet(options.authSignerKey) :
+  ethers.Wallet.createRandom()
 
 ;(async () => {
+const network = await provider.getNetwork()
 const flashbotsProvider = await flashbots.FlashbotsBundleProvider.create(
   provider,
   authSigner,
-  options.network === 'goerli' ? 'https://relay-goerli.flashbots.net/' : undefined,
-  options.network)
+  network.chainId === 5 ? 'https://relay-goerli.flashbots.net/' : undefined,
+  network.name)
 
 const currentBlockNumber = await provider.getBlockNumber()
 const currentBlock = await provider.getBlock(currentBlockNumber)
@@ -99,7 +99,7 @@ else {
       const resolution = await submission.wait()
       console.log(`Resolution: ${flashbots.FlashbotsBundleResolution[resolution]}`)
       if (resolution === flashbots.FlashbotsBundleResolution.BlockPassedWithoutInclusion) {
-        if (options.network === 'mainnet') {
+        if (network.chainId === 1) {
           failures.push([submission, targetBlockNumber])
         }
       }
