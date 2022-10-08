@@ -14,6 +14,7 @@ interface WethInterface:
 interface RethInterface:
   def approve(_spender: address, _amount: uint256) -> bool: nonpayable
   def balanceOf(_guy: address) -> uint256: view
+  def transfer(_to: address, _amount: uint256) -> bool: nonpayable
 
 struct ExactInputSingleParams:
   tokenIn: address
@@ -54,8 +55,18 @@ def setOwner(newOwner: address):
 @external
 def defund():
   assert msg.sender == self.owner, "only owner can defund"
-  wethToken.withdraw(wethToken.balanceOf(self))
-  send(self.owner, self.balance)
+
+  wethBalance: uint256 = wethToken.balanceOf(self)
+  rethBalance: uint256 = rethToken.balanceOf(self)
+
+  if 0 < wethBalance:
+    wethToken.withdraw(wethBalance)
+
+  if 0 < rethBalance:
+    rethToken.transfer(self.owner, rethBalance)
+
+  if 0 < self.balance:
+    send(self.owner, self.balance)
 
 @external
 @payable
