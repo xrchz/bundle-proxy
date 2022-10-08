@@ -78,13 +78,13 @@ def fund():
 def __default__():
   assert msg.sender == wethToken.address, "only WETH can send ETH; use fund() instead"
 
-# Require 16 WETH balance, Mint rETH with Rocket Pool at protocol rate,
+# Require 16 (or wethAmount) WETH balance,
+# Mint rETH with Rocket Pool at protocol rate,
 # Swap rETH for WETH on Uniswap (approve Uniswap to spend rETH, execute swap),
 # Return ETH profit to caller
 @external
-def arb(fee: uint24 = DEFAULT_FEE):
-  wethAmount: uint256 = as_wei_value(16, "ether")
-
+def arb(uniswapFee: uint24 = DEFAULT_FEE,
+        wethAmount: uint256 = as_wei_value(16, "ether")):
   assert wethToken.balanceOf(self) >= wethAmount, "not enough WETH, please fund()"
 
   wethToken.withdraw(wethAmount)
@@ -107,7 +107,7 @@ def arb(fee: uint24 = DEFAULT_FEE):
   swapParams: ExactInputSingleParams = ExactInputSingleParams({
     tokenIn: rethToken.address,
     tokenOut: wethToken.address,
-    fee: fee,
+    fee: uniswapFee,
     recipient: self,
     deadline: block.timestamp,
     amountIn: rethAmount,
