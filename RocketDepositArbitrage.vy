@@ -7,14 +7,14 @@ interface RocketDepositPoolInterface:
   def deposit(): payable
 
 interface WethInterface:
-  def balanceOf(_guy: address) -> uint256: view
+  def balanceOf(_who: address) -> uint256: view
   def deposit(): payable
   def withdraw(_wad: uint256): nonpayable
 
 interface RethInterface:
   def approve(_spender: address, _amount: uint256) -> bool: nonpayable
-  def balanceOf(_guy: address) -> uint256: view
-  def transfer(_to: address, _amount: uint256) -> bool: nonpayable
+  def balanceOf(_who: address) -> uint256: view
+  def transfer(_to: address, _wad: uint256) -> bool: nonpayable
 
 struct ExactInputSingleParams:
   tokenIn: address
@@ -28,6 +28,24 @@ struct ExactInputSingleParams:
 
 interface SwapRouter:
   def exactInputSingle(params: ExactInputSingleParams) -> uint256: nonpayable
+
+event OwnerChange:
+  old: indexed(address)
+  new: indexed(address)
+
+event Fund:
+  who: indexed(address)
+  wad: uint256
+
+event Defund:
+  who: indexed(address)
+  weth: uint256
+  reth: uint256
+
+event Arbitrage:
+  who: indexed(address)
+  deposit: indexed(uint256)
+  profit: uint256
 
 DEFAULT_FEE: constant(uint24) = 500
 
@@ -46,11 +64,13 @@ def __init__(wethAddress: address, rocketStorageAddress: address, swapRouterAddr
   rethToken = RethInterface(rethAddress)
   wethToken = WethInterface(wethAddress)
   swapRouter = SwapRouter(swapRouterAddress)
+  log OwnerChange(empty(address), msg.sender)
 
 @external
 def setOwner(newOwner: address):
   assert msg.sender == self.owner, "only owner can set owner"
   self.owner = newOwner
+  log OwnerChange(msg.sender, self.owner)
 
 @external
 def defund():
@@ -68,10 +88,14 @@ def defund():
   if 0 < self.balance:
     send(self.owner, self.balance)
 
+  log Defund(self.owner, wethBalance, rethBalance)
+
 @external
 @payable
 def fund():
-  wethToken.deposit(value = self.balance)
+  fundAmount: uint256 = self.balance
+  wethToken.deposit(value = fundAmount)
+  log Fund(msg.sender, fundAmount)
 
 @external
 @payable
@@ -124,3 +148,5 @@ def arb(uniswapFee: uint24 = DEFAULT_FEE,
   wethToken.withdraw(profit)
 
   send(msg.sender, profit)
+
+  log Arbitrage(msg.sender, wethAmount, profit)
