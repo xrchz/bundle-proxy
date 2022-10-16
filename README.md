@@ -1,3 +1,10 @@
+# DEPRECATED
+See [xrchz/rocketarb](https://github.com/xrchz/rocketarb) for the new version!
+
+-------
+
+# OLD README FOLLOWS
+
 # Requirements
 npm, nodejs
 
